@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parábolas de Jesús - Recopilación Completa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        h1, h2, .serif {
+            font-family: 'Playfair Display', serif;
+        }
+        .parable-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .parable-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+        .filter-btn.active {
+            background-color: #1e293b;
+            color: white;
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="text-center md:text-left">
+                <h1 class="text-3xl font-bold text-slate-900">Las Parábolas de Jesús</h1>
+                <p class="text-slate-500 italic text-sm mt-1">"Les hablaba muchas cosas por parábolas..." — Mateo 13:3</p>
+            </div>
+            <div class="relative w-full md:w-72">
+                <input type="text" id="searchInput" placeholder="Buscar parábola..." class="w-full pl-10 pr-4 py-2 rounded-full border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                <svg class="w-5 h-5 absolute left-3 top-2.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-8">
+        <!-- Filters -->
+        <div class="flex flex-wrap justify-center gap-2 mb-10" id="filterContainer">
+            <button class="filter-btn active px-6 py-2 rounded-full border border-slate-300 text-sm font-medium hover:border-slate-800 transition-colors" data-filter="all">Todas</button>
+            <button class="filter-btn px-6 py-2 rounded-full border border-slate-300 text-sm font-medium hover:border-slate-800 transition-colors" data-filter="Mateo">Mateo</button>
+            <button class="filter-btn px-6 py-2 rounded-full border border-slate-300 text-sm font-medium hover:border-slate-800 transition-colors" data-filter="Marcos">Marcos</button>
+            <button class="filter-btn px-6 py-2 rounded-full border border-slate-300 text-sm font-medium hover:border-slate-800 transition-colors" data-filter="Lucas">Lucas</button>
+        </div>
+
+        <!-- Parables Grid -->
+        <div id="parablesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Cards will be injected here by JS -->
+        </div>
+
+        <!-- No results message -->
+        <div id="noResults" class="hidden text-center py-20">
+            <p class="text-xl text-slate-500">No se encontraron parábolas que coincidan con tu búsqueda.</p>
+        </div>
+    </main>
+
+    <!-- Modal for details -->
+    <div id="parableModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[100] p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div class="p-6 md:p-8">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <span id="modalEvangelio" class="inline-block px-3 py-1 bg-blue-100 text-blue-800 text-xs font-bold rounded-full uppercase mb-2"></span>
+                        <h2 id="modalTitle" class="text-3xl font-bold text-slate-900"></h2>
+                        <p id="modalRef" class="text-slate-500 font-medium"></p>
+                    </div>
+                    <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 p-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l18 18"></path></svg>
+                    </button>
+                </div>
+                <div class="prose prose-slate max-w-none">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-2">Resumen y Significado</h3>
+                    <p id="modalMeaning" class="text-slate-600 leading-relaxed italic border-l-4 border-blue-500 pl-4 py-1 mb-6"></p>
+                    
+                    <h3 class="text-lg font-semibold text-slate-800 mb-2">Lección Principal</h3>
+                    <p id="modalLesson" class="text-slate-700 leading-relaxed"></p>
+                </div>
+                <div class="mt-8 pt-6 border-t border-slate-100 flex justify-end">
+                    <button onclick="closeModal()" class="px-6 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-white border-t border-slate-200 mt-20 py-10">
+        <div class="max-w-6xl mx-auto px-4 text-center">
+            <p class="text-slate-400 text-sm">Recopilación de las enseñanzas de Jesús de Nazaret</p>
+            <p class="text-slate-300 text-xs mt-2">Basado en las versiones Reina-Valera y Nueva Versión Internacional</p>
+        </div>
+    </footer>
+
+    <script>
+        const parables = [
+            {
+                id: 30,
+                title: "El Deber del Siervo",
+                evangelio: "Lucas",
+                ref: "Lucas 17:7-10",
+                summary: "Un siervo que trabaja en el campo regresa a casa y, antes de comer, debe servir la mesa de su señor. Al terminar, no espera agradecimiento especial porque solo cumplió con su obligación.",
+                meaning: "Ilustra que nuestra obediencia a Dios no es algo que genere un mérito extraordinario o ponga a Dios en deuda con nosotros, sino que es nuestra respuesta natural como sus siervos.",
+                lesson: "Nos enseña la humildad en el servicio. Debemos servir a Dios de corazón, reconociendo que cumplir sus mandatos es nuestra responsabilidad y privilegio, sin buscar recompensas por simple cumplimiento.",
+                color: "bg-zinc-100 text-zinc-900"
+            },
+            {
+                id: 29,
+                title: "El Rico y Lázaro",
+                evangelio: "Lucas",
+                ref: "Lucas 16:19-31",
+                summary: "Un hombre rico vive rodeado de lujos mientras un mendigo llamado Lázaro sufre a su puerta. Al morir, sus destinos se invierten: Lázaro es consolado en el seno de Abraham y el rico sufre en el Hades.",
+                meaning: "Expone las consecuencias eternas de la indiferencia hacia el prójimo y la naturaleza definitiva del destino después de la muerte.",
+                lesson: "Nos enseña que las riquezas pueden cegarnos ante las necesidades de los demás. La verdadera advertencia para el arrepentimiento ya está en la Palabra de Dios; no debemos esperar señales extraordinarias para actuar con amor.",
+                color: "bg-orange-200 text-orange-900"
+            },
+            {
+                id: 28,
+                title: "El Administrador Astuto",
+                evangelio: "Lucas",
+                ref: "Lucas 16:1-13",
+                summary: "Un administrador, a punto de ser despedido por malgastar los bienes de su señor, decide reducir las deudas de los deudores de su amo para asegurar que estos lo reciban en sus casas después de perder su empleo.",
+                meaning: "Jesús no elogia la deshonestidad, sino la sagacidad y previsión del administrador para asegurar su futuro ante una crisis inevitable.",
+                lesson: "Nos invita a usar los recursos materiales con sabiduría y generosidad para propósitos eternos. Si las personas del mundo son astutas en sus negocios temporales, los hijos de luz deben serlo aún más en asegurar su futuro espiritual.",
+                color: "bg-indigo-50 text-indigo-900"
+            },
+            {
+                id: 27,
+                title: "Los Invitados que se Excusan",
+                evangelio: "Lucas",
+                ref: "Lucas 14:15-24",
+                summary: "Un hombre prepara una gran cena e invita a muchos. Al momento del banquete, los invitados presentan excusas relacionadas con sus negocios y vida personal. El anfitrión ordena traer a los marginados para que su casa se llene.",
+                meaning: "Representa el rechazo del llamado divino por parte de quienes están demasiado ocupados con sus posesiones, y la apertura del Reino a los humildes.",
+                lesson: "Nos enseña que nada debe ser más prioritario que responder al llamado de Dios. Las bendiciones de la vida no deben convertirse en barreras para el banquete espiritual.",
+                color: "bg-rose-50 text-rose-900"
+            },
+            {
+                id: 26,
+                title: "Los Primeros Asientos",
+                evangelio: "Lucas",
+                ref: "Lucas 14:7-11",
+                summary: "Al ver cómo los invitados elegían los mejores puestos, Jesús aconseja sentarse en el último lugar para que el anfitrión los invite a subir, en lugar de ser humillados al ser movidos hacia abajo.",
+                meaning: "Representa el valor de la humildad genuina ante Dios, advirtiendo contra la búsqueda de gloria propia.",
+                lesson: "La verdadera grandeza en el Reino de Dios pertenece a los que se humillan. Quien se ensalza será humillado, pero quien se humilla con sinceridad será enaltecido por el Señor.",
+                color: "bg-violet-100 text-violet-900"
+            },
+            {
+                id: 25,
+                title: "La Higuera Estéril",
+                evangelio: "Lucas",
+                ref: "Lucas 13:6-9",
+                summary: "Un hombre plantó una higuera y, al no encontrar fruto en ella por tres años, ordenó cortarla. El viñador pidió permiso para cuidarla un año más antes de rendirse.",
+                meaning: "La higuera representa a quienes reciben bendiciones pero no dan frutos. El viñador simboliza la intercesión y la paciencia misericordiosa de Dios.",
+                lesson: "Aunque Dios es inmensamente paciente y nos ofrece oportunidades de cambio, llegará un momento en que se nos pedirá cuentas de los frutos de nuestra vida.",
+                color: "bg-lime-100 text-lime-900"
+            },
+            {
+                id: 24,
+                title: "La Semilla que Crece",
+                evangelio: "Marcos",
+                ref: "Marcos 4:26-29",
+                summary: "Un hombre echa semilla en la tierra; la semilla brota y crece sin que él sepa cómo, hasta que el grano está maduro para la siega.",
+                meaning: "Representa el poder inherente del Reino de Dios, que se desarrolla por su propia fuerza divina independientemente del esfuerzo humano.",
+                lesson: "Nos enseña a confiar en que Dios está obrando aunque no veamos resultados inmediatos. Nuestra labor es sembrar; el crecimiento pertenece a Dios.",
+                color: "bg-green-100 text-green-900"
+            },
+            {
+                id: 23,
+                title: "La Medida",
+                evangelio: "Lucas",
+                ref: "Marcos 4:24-25, Lucas 6:38",
+                summary: "Jesús enseña que con la medida con que medimos a otros, se nos medirá a nosotros, y se nos añadirá más según nuestra disposición.",
+                meaning: "La generosidad y apertura del corazón determinan cuánta gracia y entendimiento recibimos de Dios.",
+                lesson: "Nos invita a ser abundantes en misericordia. Quien busca activamente la voluntad de Dios recibirá más, mientras que el indiferente perderá lo que cree tener.",
+                color: "bg-emerald-50 text-emerald-900"
+            },
+            {
+                id: 22,
+                title: "La Lámpara",
+                evangelio: "Marcos",
+                ref: "Marcos 4:21-25, Mateo 5:14-16, Lucas 8:16-18",
+                summary: "Nadie enciende una lámpara para ponerla debajo de un cajón, sino sobre un candelero para que alumbre a los que entran.",
+                meaning: "La luz representa la verdad del Evangelio y el testimonio del creyente, que no deben ser ocultados.",
+                lesson: "Nuestra fe debe ser visible. Tenemos la responsabilidad de reflejar la luz que hemos recibido para guiar a otros a través de nuestras obras.",
+                color: "bg-yellow-200 text-yellow-900"
+            },
+            {
+                id: 21,
+                title: "Las Diez Jóvenes",
+                evangelio: "Mateo",
+                ref: "Mateo 25:1-13",
+                summary: "Diez jóvenes esperan al novio. Cinco son prudentes y llevan aceite extra; las otras cinco son descuidadas y se quedan sin luz, quedando fuera del banquete.",
+                meaning: "Representa la necesidad de estar preparados individualmente para el encuentro con Dios.",
+                lesson: "La vigilancia espiritual no se puede pedir prestado a última hora. Debemos cultivar nuestra propia relación con Dios y estar listos siempre.",
+                color: "bg-yellow-100 text-yellow-900"
+            },
+            {
+                id: 20,
+                title: "El Banquete de Bodas",
+                evangelio: "Mateo",
+                ref: "Mateo 22:1-14",
+                summary: "Un rey invita a muchos a una boda, pero son rechazados. Invita a gente de los caminos, pero expulsa a uno que no vestía la ropa de boda.",
+                meaning: "Representa la invitación universal de Dios, pero subraya que la entrada requiere una transformación personal (el vestido).",
+                lesson: "No basta con 'estar' en el Reino; debemos vestirnos con la justicia y el carácter de Cristo.",
+                color: "bg-amber-100 text-amber-900"
+            },
+            {
+                id: 19,
+                title: "Los Viñadores Asesinos",
+                evangelio: "Mateo",
+                ref: "Mateo 21:33-46, Marcos 12:1-12, Lucas 20:9-19",
+                summary: "Labradores matan a los siervos y al hijo del dueño de una viña para quedarse con ella.",
+                meaning: "Describe la historia de la rebelión de los líderes contra los profetas y el rechazo final de Jesucristo.",
+                lesson: "El Reino de Dios será entregado a quienes den frutos de justicia y reconozcan la autoridad de Cristo.",
+                color: "bg-red-100 text-red-900"
+            },
+            {
+                id: 18,
+                title: "Los Dos Hijos",
+                evangelio: "Mateo",
+                ref: "Mateo 21:28-32",
+                summary: "Un hijo dice que no trabajará pero va; el otro dice que sí pero no va.",
+                meaning: "Contrasta a quienes parecen rebeldes pero se arrepienten, con los que aparentan religiosidad pero no obedecen.",
+                lesson: "Dios valora la obediencia real y el arrepentimiento por encima de las promesas vacías.",
+                color: "bg-blue-100 text-blue-900"
+            },
+            {
+                id: 17,
+                title: "Los Obreros de la Viña",
+                evangelio: "Mateo",
+                ref: "Mateo 20:1-16",
+                summary: "Un dueño paga lo mismo a trabajadores que llegaron a distintas horas del día.",
+                meaning: "Representa la generosidad de Dios, quien otorga su gracia a todos los que responden a su llamado.",
+                lesson: "El Reino no se basa en el mérito acumulado, sino en la bondad divina. No debemos envidiar la misericordia hacia otros.",
+                color: "bg-teal-100 text-teal-800"
+            },
+            {
+                id: 1,
+                title: "El Sembrador",
+                evangelio: "Mateo",
+                ref: "Mateo 13:1-23",
+                summary: "Semilla que cae en diferentes terrenos (camino, pedregal, espinos, buena tierra).",
+                meaning: "Los terrenos representan el corazón de quienes escuchan la Palabra.",
+                lesson: "Debemos preparar nuestro corazón para que la verdad dé fruto a pesar de las dificultades.",
+                color: "bg-emerald-100 text-emerald-800"
+            },
+            {
+                id: 16,
+                title: "La Red",
+                evangelio: "Mateo",
+                ref: "Mateo 13:47-50",
+                summary: "Una red recoge peces de toda clase y luego se separan los buenos de los malos.",
+                meaning: "Simboliza el juicio final donde se revelará la verdadera naturaleza de cada persona.",
+                lesson: "Llegará un momento de rendición de cuentas donde se separará lo justo de lo malvado.",
+                color: "bg-cyan-200 text-cyan-900"
+            },
+            {
+                id: 15,
+                title: "El Tesoro Escondido",
+                evangelio: "Mateo",
+                ref: "Mateo 13:44",
+                summary: "Un hombre vende todo por comprar un campo donde halló un tesoro.",
+                meaning: "Representa el valor incalculable del Reino de Dios.",
+                lesson: "Encontrar a Dios es un gozo tan grande que cualquier sacrificio personal es pequeño en comparación.",
+                color: "bg-amber-200 text-amber-900"
+            },
+            {
+                id: 14,
+                title: "La Levadura",
+                evangelio: "Mateo",
+                ref: "Mateo 13:33",
+                summary: "Levadura que leuda toda la masa de harina.",
+                meaning: "El Reino tiene un poder transformador interno invisible pero total.",
+                lesson: "La influencia del Evangelio trabaja desde adentro hacia afuera, transformando el carácter.",
+                color: "bg-yellow-50 text-yellow-700"
+            },
+            {
+                id: 13,
+                title: "El Remiendo y los Odres",
+                evangelio: "Marcos",
+                ref: "Marcos 2:21-22",
+                summary: "No se pone remiendo nuevo en vestido viejo ni vino nuevo en odres viejos.",
+                meaning: "El mensaje de Jesús requiere estructuras y corazones nuevos, no parches.",
+                lesson: "La fe requiere un corazón renovado capaz de contener la gracia de Dios.",
+                color: "bg-orange-50 text-orange-900"
+            },
+            {
+                id: 12,
+                title: "La Casa sobre la Roca",
+                evangelio: "Mateo",
+                ref: "Mateo 7:24-27",
+                summary: "Dos constructores: uno sobre roca y otro sobre arena ante la tormenta.",
+                meaning: "La roca es la práctica activa de las enseñanzas de Jesús.",
+                lesson: "Nuestra vida necesita un fundamento sólido en la obediencia para resistir las crisis.",
+                color: "bg-slate-200 text-slate-800"
+            },
+            {
+                id: 11,
+                title: "El Siervo Despiadado",
+                evangelio: "Mateo",
+                ref: "Mateo 18:21-35",
+                summary: "Un siervo perdonado no perdona una deuda pequeña a su compañero.",
+                meaning: "Contrasta el perdón infinito de Dios con nuestra falta de perdón.",
+                lesson: "Debemos mostrar a otros la misma misericordia que Dios nos ha mostrado.",
+                color: "bg-rose-100 text-rose-800"
+            },
+            {
+                id: 2,
+                title: "El Buen Samaritano",
+                evangelio: "Lucas",
+                ref: "Lucas 10:25-37",
+                summary: "Un extranjero ayuda a un herido ignorado por religiosos.",
+                meaning: "Define al prójimo como cualquier persona que necesite ayuda.",
+                lesson: "El amor a Dios se manifiesta en la compasión práctica hacia los demás.",
+                color: "bg-orange-100 text-orange-800"
+            },
+            {
+                id: 3,
+                title: "El Hijo Pródigo",
+                evangelio: "Lucas",
+                ref: "Lucas 15:11-32",
+                summary: "Un padre recibe con amor a su hijo arrepentido.",
+                meaning: "Representa el inmenso amor y perdón de Dios hacia el pecador.",
+                lesson: "Dios siempre espera con los brazos abiertos para restaurarnos.",
+                color: "bg-blue-100 text-blue-800"
+            },
+            {
+                id: 4,
+                title: "La Oveja Perdida",
+                evangelio: "Lucas",
+                ref: "Lucas 15:1-7",
+                summary: "Un pastor busca a la única oveja extraviada dejando a las demás.",
+                meaning: "Ilustra el valor individual de cada persona ante Dios.",
+                lesson: "Hay gran gozo en el cielo por un solo pecador que se arrepiente.",
+                color: "bg-stone-100 text-stone-800"
+            },
+            {
+                id: 5,
+                title: "El Trigo y la Cizaña",
+                evangelio: "Mateo",
+                ref: "Mateo 13:24-30",
+                summary: "Mala hierba crece con el trigo hasta la cosecha.",
+                meaning: "El mundo contiene seguidores de Dios y quienes no lo son hasta el juicio.",
+                lesson: "No debemos juzgar prematuramente; Dios hará la separación final.",
+                color: "bg-yellow-100 text-yellow-800"
+            },
+            {
+                id: 6,
+                title: "La Semilla de Mostaza",
+                evangelio: "Mateo",
+                ref: "Mateo 13:31-32",
+                summary: "La semilla pequeña crece hasta ser un gran arbusto.",
+                meaning: "El Reino de Dios comienza pequeño pero crece inmensamente.",
+                lesson: "No subestimes los comienzos pequeños en la fe.",
+                color: "bg-amber-100 text-amber-800"
+            },
+            {
+                id: 7,
+                title: "La Perla de Gran Precio",
+                evangelio: "Mateo",
+                ref: "Mateo 13:45-46",
+                summary: "Un comerciante vende todo por una perla preciosa.",
+                meaning: "El Reino de Dios vale cualquier sacrificio.",
+                lesson: "La relación con Dios es el tesoro supremo.",
+                color: "bg-indigo-100 text-indigo-800"
+            },
+            {
+                id: 8,
+                title: "Los Talentos",
+                evangelio: "Mateo",
+                ref: "Mateo 25:14-30",
+                summary: "Siervos que multiplican o esconden los bienes de su señor.",
+                meaning: "Debemos usar activamente los dones que Dios nos dio.",
+                lesson: "La fidelidad consiste en usar lo que se nos ha confiado.",
+                color: "bg-purple-100 text-purple-800"
+            },
+            {
+                id: 9,
+                title: "El Rico Insensato",
+                evangelio: "Lucas",
+                ref: "Lucas 12:16-21",
+                summary: "Un hombre acumula riquezas y muere esa noche.",
+                meaning: "La vida no consiste en la abundancia de bienes.",
+                lesson: "Advierte contra la avaricia; seamos ricos para con Dios.",
+                color: "bg-red-100 text-red-800"
+            },
+            {
+                id: 10,
+                title: "El Fariseo y el Publicano",
+                evangelio: "Lucas",
+                ref: "Lucas 18:9-14",
+                summary: "Contrasta la oración orgullosa con la humilde.",
+                meaning: "La justificación viene a través de la humildad.",
+                lesson: "Dios exalta al que se humilla con corazón sincero.",
+                color: "bg-cyan-100 text-cyan-800"
+            }
+        ];
+
+        const grid = document.getElementById('parablesGrid');
+        const searchInput = document.getElementById('searchInput');
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const noResults = document.getElementById('noResults');
+        
+        let currentFilter = 'all';
+        let searchTerm = '';
+
+        function renderParables() {
+            const filtered = parables.filter(p => {
+                const matchesFilter = currentFilter === 'all' || p.evangelio === currentFilter;
+                const matchesSearch = p.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                                    p.summary.toLowerCase().includes(searchTerm.toLowerCase());
+                return matchesFilter && matchesSearch;
+            });
+
+            grid.innerHTML = '';
+            if (filtered.length === 0) {
+                noResults.classList.remove('hidden');
+            } else {
+                noResults.classList.add('hidden');
+                filtered.forEach(p => {
+                    const card = document.createElement('div');
+                    card.className = 'parable-card bg-white rounded-xl border border-slate-200 overflow-hidden cursor-pointer';
+                    card.onclick = () => openModal(p);
+                    card.innerHTML = `
+                        <div class="p-6">
+                            <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase mb-3 ${p.color || 'bg-slate-100 text-slate-700'}">${p.evangelio}</span>
+                            <h3 class="text-xl font-bold text-slate-900 mb-2 serif">${p.title}</h3>
+                            <p class="text-sm text-slate-500 mb-4">${p.ref.split(',')[0]}...</p>
+                            <p class="text-slate-600 text-sm line-clamp-3">${p.summary}</p>
+                        </div>
+                        <div class="px-6 py-3 bg-slate-50 border-t border-slate-100 flex justify-between items-center">
+                            <span class="text-xs font-semibold text-blue-600 uppercase tracking-wider">Ver lección</span>
+                            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            }
+        }
+
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.getAttribute('data-filter');
+                renderParables();
+            });
+        });
+
+        searchInput.addEventListener('input', (e) => {
+            searchTerm = e.target.value;
+            renderParables();
+        });
+
+        const modal = document.getElementById('parableModal');
+        function openModal(p) {
+            document.getElementById('modalTitle').textContent = p.title;
+            document.getElementById('modalEvangelio').textContent = p.evangelio;
+            document.getElementById('modalRef').textContent = p.ref;
+            document.getElementById('modalMeaning').textContent = p.meaning;
+            document.getElementById('modalLesson').textContent = p.lesson;
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = 'auto';
+        }
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+
+        renderParables();
+    </script>
+</body>
+</html>
